@@ -117,7 +117,6 @@ public class NoteOpenHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put(COLUMN_NOTE, updated_text);
 
-
             Cursor cursor = database.query(NoteOpenHelper.NOTE_TABLE_NAME, allColumns,
                     NoteOpenHelper.COLUMN_ID + " = " + note.getId(), null, null, null, null);
 
