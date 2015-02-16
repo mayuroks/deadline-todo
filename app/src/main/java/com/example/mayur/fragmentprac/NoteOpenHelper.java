@@ -112,23 +112,22 @@ public class NoteOpenHelper extends SQLiteOpenHelper {
             return newNote;
         }
 
+        // Add a delete method
+
         //update method
-        public Note update(Note note, String updated_text) {
+        public Note update(long noteId, String updated_note) {
             ContentValues values = new ContentValues();
-            values.put(COLUMN_NOTE, updated_text);
+            values.put(COLUMN_NOTE, updated_note);
 
             Cursor cursor = database.query(NoteOpenHelper.NOTE_TABLE_NAME, allColumns,
-                    NoteOpenHelper.COLUMN_ID + " = " + note.getId(), null, null, null, null);
-
-            database.update(NoteOpenHelper.NOTE_TABLE_NAME, values, "_id = " + note.getId() , null);
+                    NoteOpenHelper.COLUMN_ID + " = " + noteId, null, null, null, null);
+            database.update(NoteOpenHelper.NOTE_TABLE_NAME, values, "_id = ?", new String[]{ String.valueOf(noteId)});
 
             cursor.moveToFirst();
             Note newNote = cursorToNote(cursor);
             cursor.close();
             return newNote;
         }
-
-        // Add a delete method
 
         public void delete(Note note) {
             long id = note.getId();
