@@ -23,12 +23,11 @@ import java.util.Random;
  * Created by mayur on 2/2/15.
  */
 public class MyListFragment extends ListFragment {
+    private NoteOpenHelper.NotesDBApi dbApi;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        NoteOpenHelper.NotesDBApi dbApi = new NoteOpenHelper.NotesDBApi(getActivity());
-        dbApi.open();
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
         Button btn_add = (Button) view.findViewById(R.id.add);
@@ -40,6 +39,7 @@ public class MyListFragment extends ListFragment {
                 onClickButton(v);
             }
         });
+
         btn_del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,7 +54,9 @@ public class MyListFragment extends ListFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         Log.i("activity-shit", "**** activity is created ****");
         super.onActivityCreated(savedInstanceState);
-        NoteOpenHelper.NotesDBApi dbApi = new NoteOpenHelper.NotesDBApi(getActivity());
+
+
+        dbApi = new NoteOpenHelper.NotesDBApi(getActivity());
         dbApi.open();
         List<NoteOpenHelper.Note> values = dbApi.getAllNotes();
 
@@ -62,38 +64,39 @@ public class MyListFragment extends ListFragment {
 
 //        ArrayAdapter adapter = ArrayAdapter.createFromResource(getActivity(), R.array.Heroes, android.R.layout.simple_list_item_1);
         setListAdapter(adapter);
-        dbApi.close();
+
+
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         @SuppressWarnings("unchecked")
         final ArrayAdapter<NoteOpenHelper.Note> adapter = (ArrayAdapter<NoteOpenHelper.Note>) getListAdapter();
-        NoteOpenHelper.NotesDBApi dbApi = new NoteOpenHelper.NotesDBApi(getActivity());
-        dbApi.open();
-        Log.i("activity-shit", "**** List view is clicked ****");
-        Log.i("activity-shit", "**** position : " + position);
-        Log.i("activity-shit", "**** ID : " + id);
 
+        Log.i("activity-shit", "**** List view is clicked ****");
         final TextView temp = (TextView) v;
         final NoteOpenHelper.Note note = adapter.getItem(position);
-//        Toast.makeText(getActivity(), temp.getText() + "" + position, Toast.LENGTH_SHORT).show();
-        Log.i("activity-shit", "**** NOTE-ID : " + note.getId());
+//        Log.i("NOTE-TAG", "$$$$ --- OLD " + note_old + " --- $$$$");
 
         AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
         alert.setTitle("Edit");
-        alert.setMessage("Update the note");
+        alert.setMessage("bwat the fuck");
 
-        EditText input = new EditText(getActivity());
+        final EditText input = new EditText(getActivity());
+        input.setText(temp.getText().toString());
         alert.setView(input);
 
         alert.setPositiveButton("EDIT", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                String updated_note = temp.getText().toString();
-//                NoteOpenHelper.Note note_updated = dbApi.update(note.getId(), updated_note);
-//                adapter.add(note_updated);
-//                adapter.notifyDataSetChanged();
+                String updated_text = input.getText().toString();
+
+                NoteOpenHelper.Note note_new = dbApi.update(note.getId(), updated_text);
+                Log.i("NOTE-TAG", "$$$$ --- NEW " + note_new + " --- $$$$");
+                int position_of_note = adapter.getPosition(note);
+                adapter.insert(note_new, position_of_note);
+                adapter.remove(note);
+                adapter.notifyDataSetChanged();
             }
         });
 
@@ -105,18 +108,19 @@ public class MyListFragment extends ListFragment {
         });
 
         alert.show();
-        dbApi.close();
     }
 
     // for button clicks
     public void onClickButton(View v) {
         @SuppressWarnings("unchecked")
         final ArrayAdapter<NoteOpenHelper.Note> adapter = (ArrayAdapter<NoteOpenHelper.Note>) getListAdapter();
-        final NoteOpenHelper.NotesDBApi dbApi = new NoteOpenHelper.NotesDBApi(getActivity());
-        dbApi.open();
 
         switch (v.getId()) {
             case R.id.add:
+//                String[] notes = new String[]{"Cool", "Very nice", "Hate it"};
+//                int nextInt = new Random().nextInt(3);
+
+
                 AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
                 alert.setTitle("Enter Input");
                 alert.setMessage("Do something gawd damn it");
@@ -142,7 +146,9 @@ public class MyListFragment extends ListFragment {
                 });
 
                 alert.show();
-
+                // save the new comment to the database
+//                note = dbApi.create(notes[nextInt]);
+//                adapter.add(note);
                 break;
             case R.id.delete:
                 if (getListAdapter().getCount() > 0) {
@@ -154,7 +160,7 @@ public class MyListFragment extends ListFragment {
                 break;
         }
         adapter.notifyDataSetChanged();
-        dbApi.close();
+
     }
 
 
